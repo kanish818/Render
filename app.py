@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 
 # Load the trained model
-model_path = 'model.pkl'
+model_path = 'random_forest_model.pkl'  # Use the Random Forest model file name
 with open(model_path, 'rb') as file:
     model = pickle.load(file)
 
@@ -17,15 +17,18 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Extract data from form
-    int_features = [int(x) for x in request.form.values()]
-    final_features = [np.array(int_features)]
-    
-    # Make prediction
-    prediction = model.predict(final_features)
-    output = 'Placed' if prediction[0] == 1 else 'Not Placed'
+    try:
+        # Extract data from form and convert it to the correct format
+        float_features = [float(x) for x in request.form.values()]
+        final_features = [np.array(float_features)]
+        
+        # Make prediction
+        prediction = model.predict(final_features)
+        output = 'Safe to drink' if prediction[0] == 1 else 'Not safe to drink'
 
-    return render_template('index.html', prediction_text='Prediction: {}'.format(output))
+        return render_template('index.html', prediction_text='Water Quality Prediction: {}'.format(output))
+    except Exception as e:
+        return render_template('index.html', prediction_text=f"Error: {str(e)}")
 
 if __name__ == "__main__":
     app.run(debug=True)
